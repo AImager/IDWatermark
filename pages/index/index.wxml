@@ -2,10 +2,7 @@
   <view bindtap='chooseImg' class="page__hd">
     <canvas canvasId="myCanvas" class="canvas" hidden="{{bool}}" style="width:100%;height:{{canvasH}}px;"></canvas>
     <view class="bgWord" wx:if="{{!draw}}">
-      <text>点击此处打开图片\n</text>
-      <text>再次点击可更换图片\n</text>
-      <text>本小程序不会上传任何数据! 
-            所有操作均在本地完成!</text>
+      <text>点击此处选择图片</text>
     </view>
   </view>
   <view class="page__bd  page__bd_spacing">
@@ -28,6 +25,12 @@
       <view class="left">密度</view>
       <view bindtap="handelDensityClick" class="right">
         <view class="{{currentDensityIndex==item[0]?'circleSize active':'circleSize'}}" id="{{item[0]}}" wx:for="{{DensityMapItem}}" wx:key="*this">{{item[1]}}</view>
+      </view>
+    </view>
+    <view class="section">
+      <view class="left">透明度</view>
+      <view bindtap="handelOpacityClick" class="right">
+        <view class="{{currentOpacityIndex==item[0]?'circleSize active':'circleSize'}}" id="{{item[0]}}" wx:for="{{OpacityMap}}" wx:key="*this">{{item[1]}}</view>
       </view>
     </view>
     <view class="section">

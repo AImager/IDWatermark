@@ -1,6 +1,6 @@
 getApp();
 var waterMark = new(require('../../utils/waterMark.js'))(),
-  defaultConfig = {
+  constConfig = {
     colorMap: [
       ['0', '#808080'],
       ['1', '#000000'],
@@ -17,6 +17,16 @@ var waterMark = new(require('../../utils/waterMark.js'))(),
       ['5', 120],
       ['6', 140],
       ['7', 160]
+    ],
+    opacityMap: [
+      ['0', 0],
+      ['1', 10],
+      ['2', 25],
+      ['3', 40],
+      ['4', 55],
+      ['5', 70],
+      ['6', 85],
+      ['7', 100],
     ],
     densityMap: [
       ['0', 20],
@@ -38,13 +48,14 @@ var waterMark = new(require('../../utils/waterMark.js'))(),
       ['6', '1.6'],
       ['7', '1.8']
     ],
-    waterMarkConfig: {
-      color: '#808080',
-      opacity: .5,
-      size: 20,
-      density: 50,
+    defaultWatermarkConfig: {
+      color: ['0', '#808080'],
+      opacity: ['3', 40],
+      size: ['0', 20],
+      density: ['3', 50],
     },
     text: '此证件仅用作XX使用!',
+    canvasId: "myCanvas",
     debounceDelay: 200
   };
 
@@ -55,15 +66,21 @@ Page({
     canvasW: 100,
     canvasH: 200,
     inputFocus: false,
-    currentColorIndex: -1,
-    currentSizeIndex: -1,
-    currentDensityIndex: -1,
+    currentColorIndex: constConfig.defaultWatermarkConfig.color[0],
+    currentSizeIndex: constConfig.defaultWatermarkConfig.size[0],
+    currentDensityIndex: constConfig.defaultWatermarkConfig.density[0],
+    currentOpacityIndex: constConfig.defaultWatermarkConfig.opacity[0],
     isSave: false,
-    text: '此证件仅用作XX使用!'
+    text: '此证件仅用作XX使用!',
+    ColorMap: constConfig.colorMap,
+    SizeMap: constConfig.sizeMap,
+    OpacityMap: constConfig.opacityMap,
+    DensityMap: constConfig.densityMap,
+    DensityMapItem: constConfig.densityMapItem,
   },
 
   onReady: function() {
-    this.getDefaultConfig();
+    // this.setDefaultConfig();
   },
 
   /**
@@ -78,75 +95,12 @@ Page({
   },
 
   /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide: function() {
-    if (this.data.isSave) {
-      this.setData({
-        canvasW: wx.getSystemInfoSync().windowWidth,
-        canvasH: (wx.getSystemInfoSync().windowHeight) / 2.5,
-        app: '',
-        bool: false,
-        inputFocus: false,
-        currentColorIndex: -1,
-        currentSizeIndex: -1,
-        currentDensityIndex: -1,
-        text: this.data.defaultText,
-        draw: false
-      });
-      defaultConfig.waterMarkConfig.size = 20;
-      defaultConfig.waterMarkConfig.color = '#808080';
-      defaultConfig.waterMarkConfig.density = 50;
-      var indexImgUrl = {
-        width: wx.getSystemInfoSync().windowWidth,
-        height: (wx.getSystemInfoSync().windowHeight) / 2.5,
-        text: '',
-        scale: 2,
-        imgUrl: '/images/index.jpg',
-      };
-      waterMark.mark(indexImgUrl)
-    }
-  },
-
-  /**
    * 生命周期函数--监听页面显示
    */
   onShow: function() {
     this.setData({
       isSave: false
     })
-  },
-
-  /**
-   * 获取default配置
-   */
-  getDefaultConfig: function() {
-    var that = this,
-      colorMap = defaultConfig.colorMap,
-      sizeMap = defaultConfig.sizeMap,
-      waterMarkConfig = defaultConfig.waterMarkConfig,
-      densityMap = defaultConfig.densityMap,
-      densityMapItem = defaultConfig.densityMapItem,
-      defaultColorMap = colorMap.filter(function(t) {
-        return t[1] == waterMarkConfig.color;
-      }),
-      defaultSizeMap = sizeMap.filter(function(t) {
-        return t[1] == waterMarkConfig.size;
-      }),
-      defaultDensityMap = densityMap.filter(function(t) {
-        return t[1] == waterMarkConfig.density;
-      });
-    that.setData({
-      ColorMap: colorMap,
-      SizeMap: sizeMap,
-      DensityMap: densityMap,
-      DensityMapItem: densityMapItem,
-      defaultColorIndex: defaultColorMap.length ? defaultColorMap[0][0] : -1,
-      defaultSizeIndex: defaultSizeMap.length ? defaultSizeMap[0][0] : -1,
-      defaultDensityIndex: defaultDensityMap.length ? defaultDensityMap[0][0] : -1,
-      defaultText: defaultConfig.text,
-      text: defaultConfig.text,
-    });
   },
 
   /**
@@ -164,7 +118,6 @@ Page({
             var imgW = e.width,
               imgH = e.height,
               canvasW = wx.getSystemInfoSync().windowWidth,
-              widthProp = canvasW / imgW,
               canvasH = canvasW * imgH / imgW;
             that.setData({
               canvasW: canvasW,
@@ -174,32 +127,29 @@ Page({
             });
             var canvasConfig = {
               text: that.data.text,
-              id: 'myCanvas',
+              id: constConfig.canvasId,
               color: '#ffffff',
               xStart: 0,
-              yStart: -.71 * e.width,
-              xSpace: defaultConfig.waterMarkConfig.density/2,
-              ySpace: defaultConfig.waterMarkConfig.density,
+              yStart: -e.width,
+              xSpace: that.currentDensity(that.data.currentDensityIndex)/2,
+              ySpace: that.currentDensity(that.data.currentDensityIndex),
               rotate: 45,
               opacity: .5,
               width: canvasW,
               height: canvasH,
               scale: canvasW / imgW,
               size: 20,
-              imgUrl: imgUrl
+              imgUrl: imgUrl,
+              color: that.currentColor(that.data.currentColorIndex),
+              opacity: that.currentOpacity(that.data.currentOpacityIndex),
+              size: that.currentSize(that.data.currentSizeIndex),
+              density: that.currentDensity(that.data.currentDensityIndex),
             };
-            canvasConfig = Object.assign(canvasConfig, defaultConfig.waterMarkConfig);
             waterMark.mark(canvasConfig).then(function() {
               that.setData({
-                draw: true
-              }), -1 === that.data.currentColorIndex && -1 !== that.data.defaultColorIndex && that.setData({
-                currentColorIndex: that.data.defaultColorIndex
-              }), -1 === that.data.currentSizeIndex && -1 !== that.data.defaultSizeIndex && that.setData({
-                currentSizeIndex: that.data.defaultSizeIndex
-              }), -1 === that.data.currentDensityIndex && -1 !== that.data.defaultDensityIndex && that.setData({
-                currentDensityIndex: that.data.defaultDensityIndex
+                draw: true,
               })
-            })
+            });
           }
         })
       }
@@ -225,7 +175,7 @@ Page({
     this.setData({
       text: e.detail.value
     })
-  }, defaultConfig.debounceDelay),
+  }, constConfig.debounceDelay),
 
   /**
    * text获得焦点监听器
@@ -257,9 +207,29 @@ Page({
           currentSizeIndex: id
         },
         function() {
-          if (defaultConfig.waterMarkConfig.size = that.data.SizeMap[that.data.currentSizeIndex][1], !that.data.draw) return false;
+          if (!that.data.draw) return false;
           waterMark.reRendering({
-            size: defaultConfig.waterMarkConfig.size
+            size: that.currentSize(that.data.currentSizeIndex)
+          });
+        }
+      );
+    }
+  },
+
+  /**
+   * 点击透明度监听器
+   */
+  handelOpacityClick: function(e) {
+    var id = e.target.id;
+    if (id) {
+      var that = this;
+      this.setData({
+          currentOpacityIndex: id
+        },
+        function() {
+          if (!that.data.draw) return false;
+          waterMark.reRendering({
+            opacity: that.currentOpacity(that.data.currentOpacityIndex)
           });
         }
       );
@@ -277,10 +247,10 @@ Page({
           currentDensityIndex: id
         },
         function() {
-          if (defaultConfig.waterMarkConfig.density = that.data.DensityMap[that.data.currentDensityIndex][1], !that.data.draw) return false;
+          if (!that.data.draw) return false;
           waterMark.reRendering({
-            xSpace: defaultConfig.waterMarkConfig.density/2,
-            ySpace: defaultConfig.waterMarkConfig.density
+            xSpace: that.currentDensity(that.data.currentDensityIndex)/2,
+            ySpace: that.currentDensity(that.data.currentDensityIndex)
           });
         });
     };
@@ -297,9 +267,9 @@ Page({
           currentColorIndex: id
         },
         function() {
-          if (defaultConfig.waterMarkConfig.color = that.data.ColorMap[that.data.currentColorIndex][1], !that.data.draw) return false;
+          if ( !that.data.draw) return false;
           waterMark.reRendering({
-            color: defaultConfig.waterMarkConfig.color
+            color: that.currentColor(that.data.currentColorIndex)
           });
         });
     }
@@ -314,7 +284,7 @@ Page({
       title: '保存中'
     });
     wx.canvasToTempFilePath({
-      canvasId: 'myCanvas',
+      canvasId: constConfig.canvasId,
       destWidth: this.data.imgW,
       destHeight: this.data.imgH,
       success: function(e) {
@@ -336,6 +306,9 @@ Page({
     })
   },
 
+  /**
+   * 清除文字
+   */
   clearText: function(){
     this.setData({
       inputFocus: false,
@@ -347,6 +320,26 @@ Page({
     this.setData({
       inputFocus: true
     })
-  }
+  },
 
+
+  /**
+   * 获取当前属性
+   */
+  currentColor: function(index) {
+    var temp = this.data.ColorMap[index];
+    return temp == null ? constConfig.defaultWatermarkConfig.color[1] : temp[1];
+  },
+  currentSize: function(index) {
+    var temp = this.data.SizeMap[index];
+    return temp == null ? constConfig.defaultWatermarkConfig.size[1] : temp[1];
+  },
+  currentDensity: function(index) {
+    var temp = this.data.DensityMap[index];
+    return temp == null ? constConfig.defaultWatermarkConfig.density[1] : temp[1];
+  },
+  currentOpacity: function(index) {
+    var temp = this.data.OpacityMap[index];
+    return temp == null ? constConfig.defaultWatermarkConfig.opacity[1] : temp[1];
+  }
 });

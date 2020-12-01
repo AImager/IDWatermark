@@ -1,7 +1,7 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/feedback/feedback"
+    "pages/about/about"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -21,10 +21,10 @@
         "selectedIconPath": "images/selectHome.png"
       },
       {
-        "pagePath": "pages/feedback/feedback",
-        "text": "反馈",
-        "iconPath": "images/help.png",
-        "selectedIconPath": "images/selectHelp.png"
+        "pagePath": "pages/about/about",
+        "text": "关于",
+        "iconPath": "images/about.png",
+        "selectedIconPath": "images/selectAbout.png"
       }
     ],
     "boderStyle": "bottom"
