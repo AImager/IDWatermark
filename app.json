@@ -6,7 +6,7 @@
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#fff",
-    "navigationBarTitleText": "身份证水印",
+    "navigationBarTitleText": "ID水印助手",
     "navigationBarTextStyle": "black"
   },
   "tabBar": {
