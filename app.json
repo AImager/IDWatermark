@@ -28,5 +28,6 @@
       }
     ],
     "boderStyle": "bottom"
-  }
+  },
+  "sitemapLocation": "sitemap.json"
 }
